@@ -2,6 +2,7 @@ require("dotenv-flow").config();
 
 const fs = require("fs");
 const colors = require("colors");
+const prompt = require("prompt");
 
 const { CurrenciesFetcher } = require("./CurrenciesFetcher");
 const { CurrencyWebsiteDomainGuesser } = require("./CurrencyWebsiteDomainGuesser");
@@ -47,6 +48,17 @@ async function main()
 
 async function fetchCurrencies()
 {
+    if (fs.existsSync("currencies.json"))
+    {
+        console.log("currencies.json already exist, type 'o' if you want to overwrite it");
+        const result = await prompt.get([ "response" ]);
+
+        if (result.response !== "o" && result.response !== "O")
+        {
+            return;
+        }
+    }
+
     const fetcher = new CurrenciesFetcher(1, CURRENCIES_MAX_ID, {
         CMC_API_KEY,
         CMC_ENDPOINT,
