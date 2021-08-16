@@ -1,7 +1,6 @@
 require("dotenv-flow").config();
 
 const fs = require("fs");
-
 const colors = require("colors");
 
 const { CurrenciesFetcher } = require("./CurrenciesFetcher");
@@ -12,10 +11,6 @@ const CMC_ENDPOINT = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/info";
 const CURRENCIES_MAX_ID = parseInt(process.env.CURRENCIES_MAX_ID, 10);
 // Fetch X currencies data per request
 const DOWNLOAD_STEP = parseInt(process.env.DOWNLOAD_STEP, 10);
-
-console.log(CMC_API_KEY);
-console.log(CURRENCIES_MAX_ID);
-console.log(DOWNLOAD_STEP);
 
 function persistJSON(file, data)
 {
