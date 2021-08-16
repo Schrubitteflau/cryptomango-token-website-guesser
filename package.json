@@ -1,0 +1,24 @@
+{
+  "name": "cryptomango-token-website-guesser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv-flow": "^3.2.0",
+    "node-fetch": "^2.6.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cryptomangoFi/cryptomango-token-website-guesser.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cryptomangoFi/cryptomango-token-website-guesser/issues"
+  },
+  "homepage": "https://github.com/cryptomangoFi/cryptomango-token-website-guesser#readme"
+}
