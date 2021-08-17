@@ -71,6 +71,19 @@ async function fetchCurrencies()
     persistJSON("currencies.json", Object.values(currenciesData));
 }
 
+function simplifyHostname(hostname)
+{
+    // Delete the first "www." if set
+    //const checkedHostname = hostname.startsWith("www.") ? hostname.substring(4) : hostname;
+
+    // split by "." and get only the 2 last elements and rebuild the hostname
+    // this will drop the subdomains like <www|launcher|app|...>.website.com
+    // but it will not work for websites like website.gouv.eu
+    const parts = hostname.split(".");
+    const last2Parts = parts.slice(-2);
+    return last2Parts.join(".").toLowerCase();
+}
+
 function checkWebsites()
 {
     const currencies = loadJSON("currencies.json");
@@ -80,6 +93,8 @@ function checkWebsites()
     const skippedURLs = [];
     let websiteCounter = 0;
 
+    const d = {};
+
     for (const currency of currencies)
     {
         const { name, symbol } = currency;
@@ -88,29 +103,46 @@ function checkWebsites()
         for (const url of websitesURLs)
         {
             const domainGuesser = new CurrencyWebsiteDomainGuesser(name, symbol);
-            const guessedDomains = domainGuesser.getDomains();
-            const { hostname, pathname } = new URL(url);
-            // Delete the first "www." if set
-            const checkedHostname = hostname.startsWith("www.") ? hostname.substring(4) : hostname;
+            const potentialDomains = domainGuesser.getDomains();
+            console.log(potentialDomains.length)
+            const httpRegex = /^https?:\/\//i;
+            const safeUrl = httpRegex.test(url) ? url : `http://${url}`
+            const { hostname, pathname } = new URL(safeUrl);
+            const hostnameToTest = simplifyHostname(hostname);
+            
+            const re=  /^.+\.(?<tld>.+)$/
+            tld=hostname.match(re).groups.tld
+            if (typeof(d[tld]) === "undefined") d[tld] = 0;
+            d[tld]++;
 
-            const prefix = colors.bold(`[ ${++websiteCounter} / ${websitesCount} ] => `);
+            const prefix = colors.bold(`[ ${++websiteCounter} / ${websitesCount} ] => [ "${name}" / "${symbol}" ] => `);
 
-            if (checkedHostname === "github.com")
+            if (hostnameToTest === "github.com" || hostnameToTest === "bitcointalk.org")
             {
                 skippedURLs.push(url);
                 console.log(prefix + colors.yellow(`Skip ${url}`))
             }
-            else if (guessedDomains.includes(checkedHostname))
+            else if (potentialDomains.includes(hostnameToTest))
             {
-                console.log(prefix + colors.green(`${checkedHostname}`));
+                console.log(prefix + colors.green(`${hostnameToTest}`));
             }
             else
             {
                 missedWebsites.push([ url, { name, symbol } ]);
-                console.log(prefix + colors.red(`${checkedHostname}`));
+                console.log(prefix + colors.red(`${hostnameToTest}`));
             }
         }
     }
+
+    const ttt = {};
+    for (const key in d)
+    {
+        const v = d[key];
+        if (v > 5) {
+            ttt[key] = v;
+        }
+    }
+    persistJSON("TLDs.json", ttt)
 
     console.log(`Result : ${websitesCount - missedWebsites.length} / ${websitesCount - skippedURLs.length}`);
     persistJSON("missedWebsites.json", missedWebsites);
