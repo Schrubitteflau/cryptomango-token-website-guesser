@@ -13,7 +13,16 @@ function createRange(min, max, excluded)
     return range.filter(value => !excluded.includes(value));
 }
 
+/**
+* @param {Array<string>} arr 
+*/
+function removeDuplicates(arr)
+{
+   return [ ...new Set(arr) ];
+}
+
 module.exports = {
     wait,
-    createRange
+    createRange,
+    removeDuplicates
 };

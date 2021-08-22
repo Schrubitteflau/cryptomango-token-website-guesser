@@ -92,6 +92,7 @@ function checkWebsites()
     const missedWebsites = [];
     const skippedURLs = [];
     let websiteCounter = 0;
+    let totalPotentialDomains = 0;
 
     const d = {};
 
@@ -109,7 +110,9 @@ function checkWebsites()
             const safeUrl = httpRegex.test(url) ? url : `http://${url}`
             const { hostname, pathname } = new URL(safeUrl);
             const hostnameToTest = simplifyHostname(hostname);
-            
+
+            totalPotentialDomains += potentialDomains.length;
+
             const re=  /^.+\.(?<tld>.+)$/
             tld=hostname.match(re).groups.tld
             if (typeof(d[tld]) === "undefined") d[tld] = 0;
@@ -117,7 +120,7 @@ function checkWebsites()
 
             const prefix = colors.bold(`[ ${++websiteCounter} / ${websitesCount} ] => [ "${name}" / "${symbol}" ] => `);
 
-            if (hostnameToTest === "github.com" || hostnameToTest === "bitcointalk.org")
+            if (hostnameToTest === "github.com" || hostnameToTest === "bitcointalk.org" || hostnameToTest === "medium.com")
             {
                 skippedURLs.push(url);
                 console.log(prefix + colors.yellow(`Skip ${url}`))
@@ -145,14 +148,41 @@ function checkWebsites()
     persistJSON("TLDs.json", ttt)
 
     console.log(`Result : ${websitesCount - missedWebsites.length} / ${websitesCount - skippedURLs.length}`);
+    console.log(`Average number of domains checked per website : ${totalPotentialDomains / websitesCount}`);
     persistJSON("missedWebsites.json", missedWebsites);
 }
 
-function showMissedWebsites()
+async function showMissedWebsites()
 {
     const missedWebsites = loadJSON("missedWebsites.json");
+    const ignoredWebsites = loadJSON("ignoredWebsites.json");
+    const filtered = missedWebsites.filter(([ website ]) => !ignoredWebsites.includes(website));
 
-    console.log(missedWebsites);
+    console.log(`Showing ${filtered.length} tokens`);
+
+    try
+    {
+        for (const [ website, crypto ] of filtered)
+        {
+            console.log(website);
+            console.log(crypto);
+
+            console.log("Ignore this website for the next times ? (Type Y)");
+            const result = await prompt.get([ "ignore" ]);
+            if (result.ignore === "Y" || result.ignore === "y")
+            {
+                ignoredWebsites.push(website);
+            }
+        }
+    }
+    catch (error)
+    {
+        console.log(error);
+    }
+    finally
+    {
+        persistJSON("ignoredWebsites.json", ignoredWebsites);
+    }
 }
 
 main();
