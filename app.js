@@ -1,5 +1,7 @@
 require("dotenv-flow").config();
 
+const fetch = require("node-fetch")
+
 const fs = require("fs");
 const colors = require("colors");
 const prompt = require("prompt");
@@ -127,7 +129,7 @@ function checkWebsites()
             }
             else if (potentialDomains.includes(hostnameToTest))
             {
-                console.log(prefix + colors.green(`${hostnameToTest}`));
+                console.log(prefix + colors.green(`${hostnameToTest} => oui`));
             }
             else
             {
